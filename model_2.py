@@ -89,68 +89,68 @@ def test_model(model_at_the_best_epoch, dataloader, device):
         print()
 
     return acc, CM, accuracies
-def test_model_pr_roc(model_at_the_best_epoch, dataloader, device):
-    CM = np.zeros((2, 2))
+# def test_model_pr_roc(model_at_the_best_epoch, dataloader, device):
+#     CM = np.zeros((2, 2))
     
-    model_at_the_best_epoch.to(device)
-    model_at_the_best_epoch.eval()
+#     model_at_the_best_epoch.to(device)
+#     model_at_the_best_epoch.eval()
     
-    accuracies = []
-    all_probs = [] # Store all probabilities here
-    all_labels = [] # And all true labels here
-    all_preds = []
-    with torch.no_grad():
-        for batch, labels in dataloader:
-            batch = batch.view(-1, 200).to(device)
-            labels = labels.long().to(device)
+#     accuracies = []
+#     all_probs = [] # Store all probabilities here
+#     all_labels = [] # And all true labels here
+#     all_preds = []
+#     with torch.no_grad():
+#         for batch, labels in dataloader:
+#             batch = batch.view(-1, 200).to(device)
+#             labels = labels.long().to(device)
             
-            outputs = model_at_the_best_epoch(batch)
+#             outputs = model_at_the_best_epoch(batch)
             
-            # Apply softmax since output returns raw scores
-            probs = torch.softmax(outputs, dim=1)[:, 1]
+#             # Apply softmax since output returns raw scores
+#             probs = torch.softmax(outputs, dim=1)[:, 1]
             
-            # Store probabilities and true labels
-            all_probs.extend(probs.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
+#             # Store probabilities and true labels
+#             all_probs.extend(probs.cpu().numpy())
+#             all_labels.extend(labels.cpu().numpy())
 
-            _, preds = torch.max(outputs, 1)
-            # chi square
-            all_preds.extend(preds.cpu().numpy())
+#             _, preds = torch.max(outputs, 1)
+#             # chi square
+#             all_preds.extend(preds.cpu().numpy())
             
-            CM += confusion_matrix(labels.cpu(), preds.cpu(), labels=[0,1])
-            batch_acc = (torch.sum(preds == labels).item()) / labels.size(0)
-            accuracies.append(batch_acc)
+#             CM += confusion_matrix(labels.cpu(), preds.cpu(), labels=[0,1])
+#             batch_acc = (torch.sum(preds == labels).item()) / labels.size(0)
+#             accuracies.append(batch_acc)
 
-    tn, fp, fn, tp = CM.ravel()
-    acc = np.sum(np.diag(CM) / np.sum(CM))
-    sensitivity = tp / (tp + fn)
-    precision = tp / (tp + fp)
+#     tn, fp, fn, tp = CM.ravel()
+#     acc = np.sum(np.diag(CM) / np.sum(CM))
+#     sensitivity = tp / (tp + fn)
+#     precision = tp / (tp + fp)
 
-    print('\nTestset Accuracy(mean): %f %%' % (100 * acc))
-    print('Confusion Matrix : ')
-    print(CM)
-    print('- Sensitivity : ', (tp / (tp + fn)) * 100)
-    print('- Specificity : ', (tn / (tn + fp)) * 100)
-    print('- Precision: ', (tp / (tp + fp)) * 100)
-    print('- NPV: ', (tn / (tn + fn)) * 100)
-    print('- F1 : ', ((2 * sensitivity * precision) / (sensitivity + precision)) * 100)
+#     print('\nTestset Accuracy(mean): %f %%' % (100 * acc))
+#     print('Confusion Matrix : ')
+#     print(CM)
+#     print('- Sensitivity : ', (tp / (tp + fn)) * 100)
+#     print('- Specificity : ', (tn / (tn + fp)) * 100)
+#     print('- Precision: ', (tp / (tp + fp)) * 100)
+#     print('- NPV: ', (tn / (tn + fn)) * 100)
+#     print('- F1 : ', ((2 * sensitivity * precision) / (sensitivity + precision)) * 100)
     
-    # Calculate ROC AUC and return values for plotting
-    fpr, tpr, thresholds = roc_curve(all_labels, all_probs)
+#     # Calculate ROC AUC and return values for plotting
+#     # fpr, tpr, thresholds = roc_curve(all_labels, all_probs)
     
-    precision, recall, pr_thresholds = precision_recall_curve(all_labels, all_probs)
-    # chi square 
-    np.save('data/graph/all_preds_model_2.npy', all_preds)       # Predictions
-    np.save('data/graph/all_labels_model_2.npy', all_labels)     # True labels
-    print(len(all_preds), len(all_labels))
-    # Save the probabilities and labels
-    np.save('data/graph/all_probs_model_2.npy', all_probs)
-    np.save('data/graph/all_labels_model_2.npy', all_labels)
-    np.save('data/graph/precision_model_2.npy', precision)
-    np.save('data/graph/recall_model_2.npy', recall)
-    np.save('data/graph/pr_thresholds_model_2.npy', pr_thresholds)
+#     precision, recall, pr_thresholds = precision_recall_curve(all_labels, all_probs)
+#     # chi square 
+#     np.save('data/graph/all_preds_model_2.npy', all_preds)       # Predictions
+#     np.save('data/graph/all_labels_model_2.npy', all_labels)     # True labels
+#     print(len(all_preds), len(all_labels))
+#     # Save the probabilities and labels
+#     np.save('data/graph/all_probs_model_2.npy', all_probs)
+#     np.save('data/graph/all_labels_model_2.npy', all_labels)
+#     np.save('data/graph/precision_model_2.npy', precision)
+#     np.save('data/graph/recall_model_2.npy', recall)
+#     np.save('data/graph/pr_thresholds_model_2.npy', pr_thresholds)
 
-    return acc, CM, accuracies, (fpr, tpr, thresholds)
+#     return acc, CM, accuracies, (fpr, tpr, thresholds)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # Define the device 
 model = AE_SUPERVISED().to(device) # Define the model
@@ -290,39 +290,39 @@ x_train, labels_train = create_x_y_data(groups)
 train_data = TensorDataset(x_train, labels_train)
 train_loader = DataLoader(train_data, batch_size=1, shuffle=False)
 print('GENERAL EVALUATION')
-# uncomment for the further data and uncomment also the other test_model function
+# used to get the ROC and PR curves-to obtain them check the roc_curves file
 # acc_model_2, CM_model_2, accuracies_model_2 = test_model_pr_roc(model_at_the_best_epoch, train_loader, device)
-acc_model, CM_model, accuracies_model, roc_data = test_model_pr_roc(model_at_the_best_epoch, train_loader, device)
+# acc_model, CM_model, accuracies_model, roc_data = test_model_pr_roc(model_at_the_best_epoch, train_loader, device)
 
 # roc_data contains the fpr, tpr, and thresholds
-fpr, tpr, thresholds = roc_data
-np.save('fpr_model_2.npy', fpr)
-np.save('tpr_model_2.npy', tpr) 
+# fpr, tpr, thresholds = roc_data
+# np.save('fpr_model_2.npy', fpr)
+# np.save('tpr_model_2.npy', tpr) 
 
-def save_roc_data(fpr, tpr, thresholds, file_name):
-    roc_df = pd.DataFrame({
-        'FPR': fpr,
-        'TPR': tpr,
-        'Thresholds': thresholds
-    })
-    roc_df.to_csv(file_name, index=False)
-save_roc_data(*roc_data, 'roc_data.csv')
+# def save_roc_data(fpr, tpr, thresholds, file_name):
+#     roc_df = pd.DataFrame({
+#         'FPR': fpr,
+#         'TPR': tpr,
+#         'Thresholds': thresholds
+#     })
+#     roc_df.to_csv(file_name, index=False)
+# save_roc_data(*roc_data, 'roc_data.csv')
 
-#  Uncomment to plot ROC curve
-def plot_roc_curve(fpr, tpr, label=None):
-    roc_auc = auc(fpr, tpr)
-    plt.figure()
-    plt.plot(fpr, tpr, linewidth=2, label='ROC curve (area = %0.2f)' % roc_auc)
-    plt.plot([0, 1], [0, 1], 'k--')  
-    plt.axis([0, 1, 0, 1])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate') 
-    if label is not None:
-        plt.legend(loc="lower right")
-    plt.show()
+# #  Uncomment to plot ROC curve
+# def plot_roc_curve(fpr, tpr, label=None):
+#     roc_auc = auc(fpr, tpr)
+#     plt.figure()
+#     plt.plot(fpr, tpr, linewidth=2, label='ROC curve (area = %0.2f)' % roc_auc)
+#     plt.plot([0, 1], [0, 1], 'k--')  
+#     plt.axis([0, 1, 0, 1])
+#     plt.xlabel('False Positive Rate')
+#     plt.ylabel('True Positive Rate') 
+#     if label is not None:
+#         plt.legend(loc="lower right")
+#     plt.show()
 
-# Call the plot function with the returned data
-plot_roc_curve(fpr, tpr)
+# # Call the plot function with the returned data
+# plot_roc_curve(fpr, tpr)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # CLOAK ATTACK LOW
